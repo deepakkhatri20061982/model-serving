@@ -1,11 +1,43 @@
 import mlflow
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from mlflow.tracking import MlflowClient
 import joblib
 import numpy as np
 import pandas as pd
+import time
+import logging
+from prometheus_fastapi_instrumentator import Instrumentator
 
+# ---------------- Logging ----------------
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s"
+)
+logger = logging.getLogger("model_api")
+
+
+
+# ---------------- App ----------------
 app = FastAPI(title="Health Disease Prediction API")
+
+
+# ---------------- Middleware ----------------
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    latency = (time.time() - start_time) * 1000
+
+    logger.info(
+        f"{request.method} {request.url.path} "
+        f"status={response.status_code} "
+        f"latency={latency:.2f}ms"
+    )
+    return response
+
+# ---------------- Metrics ----------------
+Instrumentator().instrument(app).expose(app)
+
 
 
 # -----------------------------

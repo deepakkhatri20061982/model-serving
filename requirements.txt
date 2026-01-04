@@ -6,3 +6,4 @@ joblib
 numpy
 pydantic
 pandas
+prometheus-fastapi-instrumentator
