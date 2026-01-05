@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: model-serving-k8s-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: model-serving-k8s
+  template:
+    metadata:
+      labels:
+        app: model-serving-k8s
+    spec:
+      containers:
+      - name: model-serving-k8s
+        image: model-serving:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8081

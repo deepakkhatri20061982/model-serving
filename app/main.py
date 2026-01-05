@@ -7,7 +7,7 @@ import pandas as pd
 import time
 import logging
 from prometheus_fastapi_instrumentator import Instrumentator
-import pickle
+import os
 
 # ---------------- Logging ----------------
 logging.basicConfig(
@@ -20,7 +20,10 @@ logger = logging.getLogger("model_api")
 # -------------------------
 # Load model at startup
 # -------------------------
-model = joblib.load("logRegModel.pkl")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+print("BASE DIR ................. " + BASE_DIR)
+MODEL_PATH = os.path.join(BASE_DIR, "logRegModel.pkl")
+model = joblib.load(MODEL_PATH)
 
 
 # ---------------- App ----------------
