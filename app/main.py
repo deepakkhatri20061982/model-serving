@@ -7,6 +7,7 @@ import pandas as pd
 import time
 import logging
 from prometheus_fastapi_instrumentator import Instrumentator
+import pickle
 
 # ---------------- Logging ----------------
 logging.basicConfig(
@@ -15,6 +16,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger("model_api")
 
+
+# -------------------------
+# Load model at startup
+# -------------------------
+model = joblib.load("logRegModel.pkl")
 
 
 # ---------------- App ----------------
@@ -48,6 +54,7 @@ MODEL_NAME = "LogisticRegressionModel_V2"
 MODEL_VERSION = 1
 MODEL_STAGE = "Production"   # or Staging
 DEST_PATH = "/tmp/downloaded_model"
+
 
 @app.get("/")
 def read_root():
@@ -98,6 +105,18 @@ def predict(data: dict):
     X = pd.DataFrame([data])
     pred = loaded_model.predict(X)[0]
     proba = loaded_model.predict_proba(X)[0]
+
+    return {
+        "prediction": int(pred),
+        "confidence": float(max(proba))
+    }
+
+
+@app.post("/v2/predict")
+def predict(data: dict):
+    X = pd.DataFrame([data])
+    pred = model.predict(X)[0]
+    proba = model.predict_proba(X)[0]
 
     return {
         "prediction": int(pred),
